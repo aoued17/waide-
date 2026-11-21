@@ -1,0 +1,6 @@
+{
+  "name": "BatiGest",
+  "description": "BatiGest – Gestion commerciale, location et services : matériel industriel et BTP, échafaudages, ventes, services techniques et comptabilité.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
