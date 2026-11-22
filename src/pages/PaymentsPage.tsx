@@ -1,9 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { CreditCard, FileDown, Plus, Search } from 'lucide-react';
+import { CreditCard, FileDown, Plus, Printer, Search } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
-import { formatDateTimeFR, formatDZD, toInputDate } from '../lib/formatters';
+import { formatDateTimeFR, formatDA, toInputDate } from '../lib/formatters';
 import { generatePaymentReceiptPdf } from '../lib/pdfGenerator';
+import {
+  PrintableDocumentModal,
+  type PrintableDocPayload,
+} from '../components/PrintableDocumentModal';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
 import { Modal } from '../components/ui/Modal';
 import { EmptyState, LoadingState } from '../components/ui/States';
@@ -35,6 +39,7 @@ export function PaymentsPage() {
 
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [printDoc, setPrintDoc] = useState<PrintableDocPayload | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [customerId, setCustomerId] = useState('');
@@ -185,12 +190,12 @@ export function PaymentsPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <div className="text-xs font-semibold text-[#718096]">Total encaissé (historique)</div>
           <div className="font-arabic text-[11px] text-[#718096]">مجموع المبالغ المحصلة</div>
-          <div className="text-xl font-bold text-[#16A085] tabular-nums mt-2">{formatDZD(totalCollected)}</div>
+          <div className="text-xl font-bold text-[#16A085] tabular-nums mt-2">{formatDA(totalCollected)}</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <div className="text-xs font-semibold text-[#718096]">Créances clients restantes</div>
           <div className="font-arabic text-[11px] text-[#718096]">المبلغ لي مازال ما تخلصش</div>
-          <div className="text-xl font-bold text-[#E74C3C] tabular-nums mt-2">{formatDZD(totalReceivables)}</div>
+          <div className="text-xl font-bold text-[#E74C3C] tabular-nums mt-2">{formatDA(totalReceivables)}</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
           <div>
@@ -239,9 +244,9 @@ export function PaymentsPage() {
                       {rec.overdue && <span className="ml-2 text-[#E74C3C] font-semibold">En retard</span>}
                     </td>
                     <td className="py-2.5 px-3 font-medium text-[#202B3C]">{rec.customer_name}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums">{formatDZD(rec.total)}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums text-[#16A085]">{formatDZD(rec.paid)}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#E74C3C]">{formatDZD(rec.remaining)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatDA(rec.total)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums text-[#16A085]">{formatDA(rec.paid)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#E74C3C]">{formatDA(rec.remaining)}</td>
                     <td className="py-2.5 px-3 text-right">
                       <button
                         type="button"
@@ -306,17 +311,29 @@ export function PaymentsPage() {
                     </td>
                     <td className="py-2.5 px-3">{p.payment_method}</td>
                     <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#16A085]">
-                      + {formatDZD(p.amount)}
+                      + {formatDA(p.amount)}
                     </td>
                     <td className="py-2.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => generatePaymentReceiptPdf(p, companySettings)}
-                        className="min-h-[34px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-[#172B4D] inline-flex items-center gap-1"
-                      >
-                        <FileDown className="w-3.5 h-3.5" />
-                        <span>PDF</span>
-                      </button>
+                      <div className="inline-flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setPrintDoc({ kind: 'payment', payment: p })}
+                          className="min-h-[34px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-[#172B4D] inline-flex items-center gap-1"
+                          title="Aperçu Reçu & Impression A4"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Aperçu</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => generatePaymentReceiptPdf(p, companySettings)}
+                          className="min-h-[34px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-[#172B4D] inline-flex items-center gap-1"
+                          title="Télécharger le reçu en PDF"
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                          <span>PDF</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -386,7 +403,7 @@ export function PaymentsPage() {
                     .filter((r) => r.customer_id === customerId && r.type === opType)
                     .map((r) => (
                       <option key={r.id} value={r.id}>
-                        {r.reference} (Reste: {formatDZD(r.remaining)})
+                        {r.reference} (Reste: {formatDA(r.remaining)})
                       </option>
                     ))}
                 </select>
@@ -446,6 +463,12 @@ export function PaymentsPage() {
           </div>
         </form>
       </Modal>
+
+      <PrintableDocumentModal
+        docPayload={printDoc}
+        company={companySettings}
+        onClose={() => setPrintDoc(null)}
+      />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
 import {
   formatDateFR,
-  formatDZD,
+  formatDA,
   getDateRangeForPreset,
   isWithinRange,
   toInputDate,
@@ -141,17 +141,17 @@ export function ExpensesPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <div className="text-xs font-semibold text-[#718096]">Dépenses du jour</div>
           <div className="font-arabic text-[11px] text-[#718096]">مصاريف اليوم</div>
-          <div className="text-xl font-bold text-[#172B4D] tabular-nums mt-2">{formatDZD(totals.today)}</div>
+          <div className="text-xl font-bold text-[#172B4D] tabular-nums mt-2">{formatDA(totals.today)}</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <div className="text-xs font-semibold text-[#718096]">Dépenses cette semaine</div>
           <div className="font-arabic text-[11px] text-[#718096]">مصاريف هذا الأسبوع</div>
-          <div className="text-xl font-bold text-[#172B4D] tabular-nums mt-2">{formatDZD(totals.week)}</div>
+          <div className="text-xl font-bold text-[#172B4D] tabular-nums mt-2">{formatDA(totals.week)}</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <div className="text-xs font-semibold text-[#718096]">Dépenses ce mois</div>
           <div className="font-arabic text-[11px] text-[#718096]">مصاريف هذا الشهر</div>
-          <div className="text-xl font-bold text-[#E74C3C] tabular-nums mt-2">{formatDZD(totals.month)}</div>
+          <div className="text-xl font-bold text-[#E74C3C] tabular-nums mt-2">{formatDA(totals.month)}</div>
         </div>
       </div>
 
@@ -246,7 +246,7 @@ export function ExpensesPage() {
                       </td>
                       <td className="py-3 px-4 text-[#718096]">{e.payment_method}</td>
                       <td className="py-3 px-4 text-right tabular-nums font-bold text-[#E74C3C]">
-                        {formatDZD(e.amount)}
+                        {formatDA(e.amount)}
                       </td>
                     </tr>
                   ))}
@@ -261,7 +261,7 @@ export function ExpensesPage() {
               {byCategory.map(([cat, total]) => (
                 <div key={cat} className="py-2.5 flex items-center justify-between">
                   <span className="text-[#202B3C] font-medium">{cat}</span>
-                  <span className="font-semibold text-[#172B4D] tabular-nums">{formatDZD(total)}</span>
+                  <span className="font-semibold text-[#172B4D] tabular-nums">{formatDA(total)}</span>
                 </div>
               ))}
             </div>

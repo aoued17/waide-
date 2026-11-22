@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { CheckCircle2, Plus, Wrench } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
-import { formatDateFR, formatDZD, formatQty, toInputDate } from '../lib/formatters';
+import { formatDateFR, formatDA, formatQty, toInputDate } from '../lib/formatters';
 import type { MaintenanceRecord, MaintenanceStatus } from '../types/erp';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
 import { Modal } from '../components/ui/Modal';
@@ -189,7 +189,7 @@ export function MaintenancePage() {
                     </td>
                     <td className="py-3 px-4">{m.technician_or_supplier || '—'}</td>
                     <td className="py-3 px-4 tabular-nums">{formatDateFR(m.maintenance_date)}</td>
-                    <td className="py-3 px-4 text-right tabular-nums font-semibold">{formatDZD(m.cost)}</td>
+                    <td className="py-3 px-4 text-right tabular-nums font-semibold">{formatDA(m.cost)}</td>
                     <td className="py-3 px-4">
                       {m.status === 'termine' ? (
                         <StatusText tone="success" icon="check" label="Terminé" />

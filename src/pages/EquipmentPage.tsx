@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
-import { formatDZD, formatQty } from '../lib/formatters';
+import { formatDA, formatQty } from '../lib/formatters';
 import type { ActivityType, Equipment, TrackingMode } from '../types/erp';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
 import { Modal } from '../components/ui/Modal';
@@ -510,11 +510,11 @@ export function EquipmentPage() {
                     <td className="py-3 px-4 text-right tabular-nums text-xs">
                       {eq.activity_type !== 'vente' && (
                         <div className="text-[#172B4D] font-medium">
-                          {formatDZD(eq.indicative_rental_price)} / {eq.indicative_rental_period}
+                          {formatDA(eq.indicative_rental_price)} / {eq.indicative_rental_period}
                         </div>
                       )}
                       {eq.activity_type !== 'location' && (
-                        <div className="text-[#718096]">Vente: {formatDZD(eq.sale_price)}</div>
+                        <div className="text-[#718096]">Vente: {formatDA(eq.sale_price)}</div>
                       )}
                     </td>
                     <td className="py-3 px-4">

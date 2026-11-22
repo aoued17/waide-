@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { CreditCard, Edit3, Plus, Search, ShoppingBag } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
-import { formatDateFR, formatDZD, toInputDate } from '../lib/formatters';
+import { formatDateFR, formatDA, toInputDate } from '../lib/formatters';
 import type { Supplier } from '../types/erp';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
 import { Modal } from '../components/ui/Modal';
@@ -291,10 +291,10 @@ export function SuppliersPage() {
                         <div>{s.phone || '—'}</div>
                         <div>{s.email}</div>
                       </td>
-                      <td className="py-3 px-4 text-right tabular-nums">{formatDZD(b.purchased)}</td>
-                      <td className="py-3 px-4 text-right tabular-nums text-[#16A085]">{formatDZD(b.paid)}</td>
+                      <td className="py-3 px-4 text-right tabular-nums">{formatDA(b.purchased)}</td>
+                      <td className="py-3 px-4 text-right tabular-nums text-[#16A085]">{formatDA(b.paid)}</td>
                       <td className="py-3 px-4 text-right tabular-nums font-semibold text-[#E74C3C]">
-                        {formatDZD(b.balance)}
+                        {formatDA(b.balance)}
                       </td>
                       <td className="py-3 px-4 text-right">
                         <button
@@ -336,8 +336,8 @@ export function SuppliersPage() {
                     <td className="py-2.5 px-3 tabular-nums">{formatDateFR(p.purchase_date)}</td>
                     <td className="py-2.5 px-3 font-medium">{p.supplier_name}</td>
                     <td className="py-2.5 px-3 text-[#718096]">{p.description}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums font-semibold">{formatDZD(p.total_amount)}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums text-[#16A085]">{formatDZD(p.amount_paid)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums font-semibold">{formatDA(p.total_amount)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums text-[#16A085]">{formatDA(p.amount_paid)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -422,7 +422,7 @@ export function SuppliersPage() {
           <select value={payPurchaseId} onChange={(e) => setPayPurchaseId(e.target.value)} className="w-full min-h-[42px] px-3 rounded-lg border border-slate-300 text-sm bg-white">
             <option value="">Acompte général (sans achat spécifique)</option>
             {supplierPurchases.filter((p) => p.supplier_id === paySupplierId).map((p) => (
-              <option key={p.id} value={p.id}>{p.reference} — {p.description} (Reste: {formatDZD(Math.max(0, p.total_amount - p.amount_paid))})</option>
+              <option key={p.id} value={p.id}>{p.reference} — {p.description} (Reste: {formatDA(Math.max(0, p.total_amount - p.amount_paid))})</option>
             ))}
           </select>
           <div className="grid grid-cols-2 gap-3">

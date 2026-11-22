@@ -1,9 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { FileDown, Plus, Search, Trash2 } from 'lucide-react';
+import { FileDown, Plus, Printer, Search, Trash2 } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
-import { formatDateFR, formatDZD, formatQty, toInputDate } from '../lib/formatters';
+import { formatDateFR, formatDA, formatQty, toInputDate } from '../lib/formatters';
 import { generateSaleInvoicePdf } from '../lib/pdfGenerator';
+import {
+  PrintableDocumentModal,
+  type PrintableDocPayload,
+} from '../components/PrintableDocumentModal';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
 import { Modal } from '../components/ui/Modal';
 import { EmptyState, LoadingState, StatusText } from '../components/ui/States';
@@ -20,6 +24,7 @@ export function SalesPage() {
   const [search, setSearch] = useState('');
   const [filterPayment, setFilterPayment] = useState<'all' | 'unpaid' | 'paid'>('all');
   const [createOpen, setCreateOpen] = useState(false);
+  const [printDoc, setPrintDoc] = useState<PrintableDocPayload | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [customerId, setCustomerId] = useState('');
@@ -207,13 +212,13 @@ export function SalesPage() {
                         ))}
                       </td>
                       <td className="py-3 px-4 text-right tabular-nums font-semibold text-[#172B4D]">
-                        {formatDZD(s.total_amount)}
+                        {formatDA(s.total_amount)}
                       </td>
                       <td className="py-3 px-4 text-right tabular-nums text-[#16A085]">
-                        {formatDZD(s.amount_paid)}
+                        {formatDA(s.amount_paid)}
                       </td>
                       <td className="py-3 px-4 text-right tabular-nums font-semibold text-[#E74C3C]">
-                        {formatDZD(rem)}
+                        {formatDA(rem)}
                       </td>
                       <td className="py-3 px-4">
                         {rem <= 0.01 ? (
@@ -225,14 +230,32 @@ export function SalesPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => generateSaleInvoicePdf(s, companySettings)}
-                          className="min-h-[36px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
-                        >
-                          <FileDown className="w-3.5 h-3.5" />
-                          <span>PDF</span>
-                        </button>
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPrintDoc({
+                                kind: 'sale',
+                                sale: s,
+                                defaultVariant: 'facture',
+                              })
+                            }
+                            className="min-h-[36px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
+                            title="Aperçu Facture / Devis & Impression A4"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Aperçu</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => generateSaleInvoicePdf(s, companySettings)}
+                            className="min-h-[36px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
+                            title="Télécharger la facture en PDF"
+                          >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span>PDF</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -327,7 +350,7 @@ export function SalesPage() {
                         </select>
                         {eq && (
                           <div className="text-[10px] text-[#718096] mt-0.5 tabular-nums">
-                            Prix d&apos;achat réf. : {formatDZD(eq.purchase_price)}
+                            Prix d&apos;achat réf. : {formatDA(eq.purchase_price)}
                           </div>
                         )}
                       </div>
@@ -362,7 +385,7 @@ export function SalesPage() {
                       </div>
                       <div className="sm:col-span-2 flex items-center justify-between sm:justify-end gap-2">
                         <span className="text-xs font-bold text-[#172B4D] tabular-nums">
-                          {formatDZD(l.qty * l.unit_price)}
+                          {formatDA(l.qty * l.unit_price)}
                         </span>
                         <button
                           type="button"
@@ -426,11 +449,11 @@ export function SalesPage() {
 
           <div className="bg-[#172B4D] text-white rounded-xl p-4 flex items-center justify-between">
             <div className="text-xs text-slate-300">
-              Reste à payer : <strong className="text-[#FF8A24] tabular-nums">{formatDZD(remaining)}</strong>
+              Reste à payer : <strong className="text-[#FF8A24] tabular-nums">{formatDA(remaining)}</strong>
             </div>
             <div className="text-right">
               <div className="text-xs text-slate-300">Net à payer</div>
-              <div className="text-xl font-bold tabular-nums">{formatDZD(totalAmount)}</div>
+              <div className="text-xl font-bold tabular-nums">{formatDA(totalAmount)}</div>
             </div>
           </div>
 
@@ -452,6 +475,12 @@ export function SalesPage() {
           </div>
         </form>
       </Modal>
+
+      <PrintableDocumentModal
+        docPayload={printDoc}
+        company={companySettings}
+        onClose={() => setPrintDoc(null)}
+      />
     </div>
   );
 }

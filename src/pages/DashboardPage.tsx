@@ -10,7 +10,7 @@ import {
   computeLateDuration,
   formatDateFR,
   formatDateTimeFR,
-  formatDZD,
+  formatDA,
   formatQty,
   getDateRangeForPreset,
   isRentalOverdue,
@@ -263,34 +263,34 @@ export function DashboardPage({ onNavigate }: { onNavigate: (section: NavSection
         <KpiCard
           fr="Chiffre d'affaires facturé"
           ar="رقم المعاملات المفوتر"
-          value={formatDZD(metrics.totalInvoiced)}
+          value={formatDA(metrics.totalInvoiced)}
           hint="Locations + Ventes + Services"
         />
         <KpiCard
           fr="Total des encaissements"
           ar="المبالغ المحصلة فعليا"
-          value={formatDZD(metrics.totalCollected)}
+          value={formatDA(metrics.totalCollected)}
           tone="success"
           hint="Paiements réellement reçus"
         />
         <KpiCard
           fr="Total des créances clients"
           ar="المبلغ لي مازال ما تخلصش"
-          value={formatDZD(metrics.totalReceivables)}
+          value={formatDA(metrics.totalReceivables)}
           tone={metrics.totalReceivables > 0 ? 'warning' : 'neutral'}
           hint="Soldes restants à recouvrer"
         />
         <KpiCard
           fr="Total des dépenses"
           ar="المصاريف"
-          value={formatDZD(metrics.totalExpenses)}
+          value={formatDA(metrics.totalExpenses)}
           tone="danger"
           hint="Dépenses sur la période"
         />
         <KpiCard
           fr="Résultat net estimé"
           ar="النتيجة الصافية التقديرية"
-          value={formatDZD(metrics.estimatedNetResult)}
+          value={formatDA(metrics.estimatedNetResult)}
           tone={metrics.estimatedNetResult >= 0 ? 'success' : 'danger'}
           hint="Encaissements − Coût ventes − Dépenses − Maint."
         />
@@ -476,7 +476,7 @@ export function DashboardPage({ onNavigate }: { onNavigate: (section: NavSection
                     <div className="text-[#718096] tabular-nums">{formatDateFR(r.exit_at)}</div>
                   </div>
                   <span className="font-semibold text-[#172B4D] tabular-nums whitespace-nowrap">
-                    {formatDZD(r.total_amount)}
+                    {formatDA(r.total_amount)}
                   </span>
                 </div>
               ))}
@@ -512,7 +512,7 @@ export function DashboardPage({ onNavigate }: { onNavigate: (section: NavSection
                     </div>
                   </div>
                   <span className="font-semibold text-[#16A085] tabular-nums whitespace-nowrap">
-                    + {formatDZD(p.amount)}
+                    + {formatDA(p.amount)}
                   </span>
                 </div>
               ))}

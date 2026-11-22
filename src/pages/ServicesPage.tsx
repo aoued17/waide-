@@ -1,10 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { FileDown, MapPin, Plus, Search, Tag } from 'lucide-react';
+import { FileDown, MapPin, Plus, Printer, Search, Tag } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
-import { formatDateFR, formatDZD, toInputDate } from '../lib/formatters';
+import { formatDateFR, formatDA, toInputDate } from '../lib/formatters';
 import { generateServiceOrderPdf } from '../lib/pdfGenerator';
 import type { ServiceOrder, ServiceStatus } from '../types/erp';
+import {
+  PrintableDocumentModal,
+  type PrintableDocPayload,
+} from '../components/PrintableDocumentModal';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
 import { Modal } from '../components/ui/Modal';
 import { EmptyState, LoadingState, StatusText } from '../components/ui/States';
@@ -18,6 +22,7 @@ export function ServicesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [typeModalOpen, setTypeModalOpen] = useState(false);
   const [detailService, setDetailService] = useState<ServiceOrder | null>(null);
+  const [printDoc, setPrintDoc] = useState<PrintableDocPayload | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Service type creation
@@ -292,13 +297,13 @@ export function ServicesPage() {
                         {s.expected_end_date && <div>Fin prévue: {formatDateFR(s.expected_end_date)}</div>}
                       </td>
                       <td className="py-3 px-4 text-right tabular-nums font-semibold text-[#172B4D]">
-                        {formatDZD(s.agreed_price)}
+                        {formatDA(s.agreed_price)}
                       </td>
                       <td className="py-3 px-4 text-right tabular-nums text-[#16A085]">
-                        {formatDZD(s.amount_paid)}
+                        {formatDA(s.amount_paid)}
                       </td>
                       <td className="py-3 px-4 text-right tabular-nums font-semibold text-[#E74C3C]">
-                        {formatDZD(rem)}
+                        {formatDA(rem)}
                       </td>
                       <td className="py-3 px-4">
                         {s.status === 'termine' || s.status === 'livre' ? (
@@ -312,14 +317,32 @@ export function ServicesPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => generateServiceOrderPdf(s, companySettings)}
-                          className="min-h-[36px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
-                        >
-                          <FileDown className="w-3.5 h-3.5" />
-                          <span>PDF</span>
-                        </button>
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPrintDoc({
+                                kind: 'service',
+                                service: s,
+                                defaultVariant: s.status === 'en_attente' ? 'devis' : 'facture',
+                              })
+                            }
+                            className="min-h-[36px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
+                            title="Aperçu Ordre / Devis & Impression A4"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Aperçu</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => generateServiceOrderPdf(s, companySettings)}
+                            className="min-h-[36px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
+                            title="Télécharger l'ordre de service en PDF"
+                          >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span>PDF</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -578,6 +601,21 @@ export function ServicesPage() {
                 </select>
                 <button
                   type="button"
+                  onClick={() =>
+                    setPrintDoc({
+                      kind: 'service',
+                      service: detailService,
+                      defaultVariant:
+                        detailService.status === 'en_attente' ? 'devis' : 'facture',
+                    })
+                  }
+                  className="min-h-[36px] px-3 rounded-lg border border-slate-300 bg-white text-[#172B4D] text-xs font-medium inline-flex items-center gap-1"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Aperçu</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => generateServiceOrderPdf(detailService, companySettings)}
                   className="min-h-[36px] px-3 rounded-lg bg-[#172B4D] text-white text-xs font-medium inline-flex items-center gap-1"
                 >
@@ -605,8 +643,8 @@ export function ServicesPage() {
                         {iv.assigned_employees && <div className="text-[#718096]">Équipe: {iv.assigned_employees}</div>}
                       </div>
                       <div className="text-right tabular-nums text-[#718096]">
-                        <div>Transport: {formatDZD(iv.transport_expense)}</div>
-                        <div>Main d&apos;œuvre: {formatDZD(iv.labor_expense)}</div>
+                        <div>Transport: {formatDA(iv.transport_expense)}</div>
+                        <div>Main d&apos;œuvre: {formatDA(iv.labor_expense)}</div>
                       </div>
                     </div>
                   ))}
@@ -686,6 +724,12 @@ export function ServicesPage() {
           </div>
         )}
       </Modal>
+
+      <PrintableDocumentModal
+        docPayload={printDoc}
+        company={companySettings}
+        onClose={() => setPrintDoc(null)}
+      />
     </div>
   );
 }

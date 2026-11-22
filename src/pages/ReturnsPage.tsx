@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import {
   AlertTriangle,
   FileDown,
+  Printer,
   RotateCcw,
 } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
@@ -9,7 +10,7 @@ import { formatDbError, supabase } from '../lib/supabase';
 import {
   computeLateDuration,
   formatDateTimeFR,
-  formatDZD,
+  formatDA,
   formatQty,
   isRentalOverdue,
   toInputDate,
@@ -17,6 +18,10 @@ import {
 } from '../lib/formatters';
 import { generateReturnReceiptPdf } from '../lib/pdfGenerator';
 import type { Rental, ReturnCondition } from '../types/erp';
+import {
+  PrintableDocumentModal,
+  type PrintableDocPayload,
+} from '../components/PrintableDocumentModal';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
 import { Modal } from '../components/ui/Modal';
 import { EmptyState, LoadingState } from '../components/ui/States';
@@ -38,6 +43,7 @@ export function ReturnsPage() {
   const { rentals, returns, companySettings, dataLoading, refreshAll, notify } = useErp();
 
   const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
+  const [printDoc, setPrintDoc] = useState<PrintableDocPayload | null>(null);
   const [returnDate, setReturnDate] = useState(toInputDate());
   const [returnTime, setReturnTime] = useState(toInputTime());
   const [additionalCharges, setAdditionalCharges] = useState('0');
@@ -264,19 +270,37 @@ export function ReturnsPage() {
                         ))}
                       </td>
                       <td className="py-3 px-4 text-right tabular-nums font-semibold">
-                        {formatDZD(ret.additional_charges)}
+                        {formatDA(ret.additional_charges)}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            generateReturnReceiptPdf(ret, parent?.reference ?? '—', companySettings)
-                          }
-                          className="min-h-[34px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
-                        >
-                          <FileDown className="w-3.5 h-3.5" />
-                          <span>PDF</span>
-                        </button>
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPrintDoc({
+                                kind: 'return',
+                                ret,
+                                rentalRef: parent?.reference ?? '-',
+                              })
+                            }
+                            className="min-h-[34px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
+                            title="Aperçu & Impression A4"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Aperçu</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              generateReturnReceiptPdf(ret, parent?.reference ?? '-', companySettings)
+                            }
+                            className="min-h-[34px] px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-[#172B4D] inline-flex items-center gap-1"
+                            title="Télécharger le Bon de retour en PDF"
+                          >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span>PDF</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -325,7 +349,7 @@ export function ReturnsPage() {
                     onClick={applySuggestedLateFee}
                     className="px-2.5 py-1 rounded bg-white border border-red-300 text-[#E74C3C] font-semibold"
                   >
-                    Appliquer pénalité ({formatDZD(companySettings.late_fee_rate_per_day)}/j)
+                    Appliquer pénalité ({formatDA(companySettings.late_fee_rate_per_day)}/j)
                   </button>
                 )}
               </div>
@@ -470,6 +494,12 @@ export function ReturnsPage() {
           </form>
         )}
       </Modal>
+
+      <PrintableDocumentModal
+        docPayload={printDoc}
+        company={companySettings}
+        onClose={() => setPrintDoc(null)}
+      />
     </div>
   );
 }

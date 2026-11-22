@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Archive, Edit3, FileDown, Plus, Search } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import { formatDbError, supabase } from '../lib/supabase';
-import { formatDateFR, formatDZD } from '../lib/formatters';
+import { formatDateFR, formatDA } from '../lib/formatters';
 import { generateCustomerStatementPdf } from '../lib/pdfGenerator';
 import type { Customer, CustomerType } from '../types/erp';
 import { BilingualLabel } from '../components/ui/BilingualLabel';
@@ -245,10 +245,10 @@ export function CustomersPage() {
                         <div>{c.phone || '—'}</div>
                         <div>{c.email}</div>
                       </td>
-                      <td className="py-3 px-4 text-right tabular-nums">{formatDZD(sum.invoiced)}</td>
-                      <td className="py-3 px-4 text-right tabular-nums text-[#16A085]">{formatDZD(sum.paid)}</td>
+                      <td className="py-3 px-4 text-right tabular-nums">{formatDA(sum.invoiced)}</td>
+                      <td className="py-3 px-4 text-right tabular-nums text-[#16A085]">{formatDA(sum.paid)}</td>
                       <td className="py-3 px-4 text-right tabular-nums font-semibold text-[#E74C3C]">
-                        {formatDZD(sum.balance)}
+                        {formatDA(sum.balance)}
                       </td>
                       <td className="py-3 px-4">
                         {c.is_archived ? (
@@ -407,15 +407,15 @@ export function CustomersPage() {
               <div className="grid grid-cols-3 gap-3 bg-[#F4F6FA] p-3.5 rounded-lg">
                 <div>
                   <div className="text-[#718096]">Total facturé</div>
-                  <div className="text-base font-bold text-[#172B4D] tabular-nums">{formatDZD(sum.invoiced)}</div>
+                  <div className="text-base font-bold text-[#172B4D] tabular-nums">{formatDA(sum.invoiced)}</div>
                 </div>
                 <div>
                   <div className="text-[#718096]">Total encaissé</div>
-                  <div className="text-base font-bold text-[#16A085] tabular-nums">{formatDZD(sum.paid)}</div>
+                  <div className="text-base font-bold text-[#16A085] tabular-nums">{formatDA(sum.paid)}</div>
                 </div>
                 <div>
                   <div className="text-[#718096]">Solde dû</div>
-                  <div className="text-base font-bold text-[#E74C3C] tabular-nums">{formatDZD(sum.balance)}</div>
+                  <div className="text-base font-bold text-[#E74C3C] tabular-nums">{formatDA(sum.balance)}</div>
                 </div>
               </div>
 
@@ -430,8 +430,8 @@ export function CustomersPage() {
                         <span className="text-[#718096] ml-2">· {row.type} · {formatDateFR(row.date)}</span>
                       </div>
                       <div className="tabular-nums text-right">
-                        <span className="font-semibold text-[#172B4D]">{formatDZD(row.amount)}</span>
-                        <span className="text-[#718096] ml-2">(Payé: {formatDZD(row.paid)})</span>
+                        <span className="font-semibold text-[#172B4D]">{formatDA(row.amount)}</span>
+                        <span className="text-[#718096] ml-2">(Payé: {formatDA(row.paid)})</span>
                       </div>
                     </div>
                   ))

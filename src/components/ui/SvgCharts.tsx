@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatDZD, formatQty } from '../../lib/formatters';
+import { formatDA, formatQty } from '../../lib/formatters';
 
 export interface MonthlySeriesPoint {
   label: string;
@@ -51,14 +51,14 @@ export function DualBarChart({
                   <div
                     className="w-full max-w-[20px] rounded-t bg-[#172B4D] transition-opacity group-hover:opacity-85"
                     style={{ height: `${pt.revenue > 0 ? revH : 2}px` }}
-                    title={`${pt.label} — Revenus : ${formatDZD(pt.revenue)}`}
+                    title={`${pt.label} — Revenus : ${formatDA(pt.revenue)}`}
                   />
                 )}
                 {(mode === 'expenses' || mode === 'comparison') && (
                   <div
                     className="w-full max-w-[20px] rounded-t bg-[#FF8A24] transition-opacity group-hover:opacity-85"
                     style={{ height: `${pt.expenses > 0 ? expH : 2}px` }}
-                    title={`${pt.label} — Dépenses : ${formatDZD(pt.expenses)}`}
+                    title={`${pt.label} — Dépenses : ${formatDA(pt.expenses)}`}
                   />
                 )}
                 {mode === 'rentals' && (

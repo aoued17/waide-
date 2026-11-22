@@ -3,7 +3,7 @@ import { FileDown, FileSpreadsheet } from 'lucide-react';
 import { useErp } from '../context/ErpContext';
 import {
   formatDateFR,
-  formatDZD,
+  formatDA,
   formatQty,
   getDateRangeForPreset,
   isWithinRange,
@@ -92,50 +92,50 @@ export function ReportsPage() {
     const receivablesRows = [
       ...rentals
         .filter((r) => r.status !== 'annulee' && r.total_amount - r.amount_paid > 0.01)
-        .map((r) => ['Location', r.reference, r.customer_name, formatDZD(r.total_amount), formatDZD(r.amount_paid), formatDZD(r.total_amount - r.amount_paid)]),
+        .map((r) => ['Location', r.reference, r.customer_name, formatDA(r.total_amount), formatDA(r.amount_paid), formatDA(r.total_amount - r.amount_paid)]),
       ...sales
         .filter((s) => s.total_amount - s.amount_paid > 0.01)
-        .map((s) => ['Vente', s.reference, s.customer_name, formatDZD(s.total_amount), formatDZD(s.amount_paid), formatDZD(s.total_amount - s.amount_paid)]),
+        .map((s) => ['Vente', s.reference, s.customer_name, formatDA(s.total_amount), formatDA(s.amount_paid), formatDA(s.total_amount - s.amount_paid)]),
       ...services
         .filter((s) => s.status !== 'annule' && s.agreed_price - s.amount_paid > 0.01)
-        .map((s) => ['Service', s.reference, s.customer_name, formatDZD(s.agreed_price), formatDZD(s.amount_paid), formatDZD(s.agreed_price - s.amount_paid)]),
+        .map((s) => ['Service', s.reference, s.customer_name, formatDA(s.agreed_price), formatDA(s.amount_paid), formatDA(s.agreed_price - s.amount_paid)]),
     ];
 
     return {
       globalIndicators: [
         {
           label: "Chiffre d'affaires facturé",
-          value: formatDZD(caFacture),
+          value: formatDA(caFacture),
           formula: 'Somme des locations + ventes + services facturés sur la période',
         },
         {
           label: 'Encaissements réels',
-          value: formatDZD(encaissements),
+          value: formatDA(encaissements),
           formula: 'Somme des paiements réellement reçus en caisse/banque sur la période',
         },
         {
           label: 'Créances clients (solde global)',
-          value: formatDZD(creancesClients),
+          value: formatDA(creancesClients),
           formula: 'Total facturé actif moins total des paiements reçus (toutes périodes)',
         },
         {
           label: "Coût d'achat des ventes",
-          value: formatDZD(coutAchatVentes),
+          value: formatDA(coutAchatVentes),
           formula: "Somme des (quantité vendue × prix d'achat unitaire) sur la période",
         },
         {
           label: 'Dépenses opérationnelles',
-          value: formatDZD(totalDepenses),
+          value: formatDA(totalDepenses),
           formula: 'Somme des dépenses enregistrées sur la période',
         },
         {
           label: 'Coûts de maintenance',
-          value: formatDZD(coutMaintenance),
+          value: formatDA(coutMaintenance),
           formula: 'Somme des coûts de réparation enregistrés sur la période',
         },
         {
           label: 'Résultat net estimé (trésorerie ajustée)',
-          value: formatDZD(resultatNetEstime),
+          value: formatDA(resultatNetEstime),
           formula: "Encaissements réels − Coût d'achat des ventes − Dépenses − Coûts de maintenance",
         },
       ],
@@ -144,13 +144,13 @@ export function ReportsPage() {
           title: 'Rapport financier global',
           headers: ['Indicateur', 'Montant', 'Méthode de calcul'],
           rows: [
-            ["Chiffre d'affaires facturé", formatDZD(caFacture), 'Locations + Ventes + Services facturés'],
-            ['Encaissements réels', formatDZD(encaissements), 'Paiements effectivement encaissés'],
-            ['Créances clients', formatDZD(creancesClients), 'Reste dû sur factures non soldées'],
-            ["Coût d'achat des ventes", formatDZD(coutAchatVentes), "Base prix d'achat des articles vendus"],
-            ['Dépenses', formatDZD(totalDepenses), 'Charges enregistrées sur la période'],
-            ['Coûts de maintenance', formatDZD(coutMaintenance), 'Réparations enregistrées sur la période'],
-            ['Résultat net estimé', formatDZD(resultatNetEstime), "Encaissements − Coût d'achat − Dépenses − Maintenance"],
+            ["Chiffre d'affaires facturé", formatDA(caFacture), 'Locations + Ventes + Services facturés'],
+            ['Encaissements réels', formatDA(encaissements), 'Paiements effectivement encaissés'],
+            ['Créances clients', formatDA(creancesClients), 'Reste dû sur factures non soldées'],
+            ["Coût d'achat des ventes", formatDA(coutAchatVentes), "Base prix d'achat des articles vendus"],
+            ['Dépenses', formatDA(totalDepenses), 'Charges enregistrées sur la période'],
+            ['Coûts de maintenance', formatDA(coutMaintenance), 'Réparations enregistrées sur la période'],
+            ['Résultat net estimé', formatDA(resultatNetEstime), "Encaissements − Coût d'achat − Dépenses − Maintenance"],
           ],
         },
         locations: {
@@ -162,9 +162,9 @@ export function ReportsPage() {
             formatDateFR(r.exit_at),
             formatDateFR(r.expected_return_at),
             r.status,
-            formatDZD(r.total_amount),
-            formatDZD(r.amount_paid),
-            formatDZD(Math.max(0, r.total_amount - r.amount_paid)),
+            formatDA(r.total_amount),
+            formatDA(r.amount_paid),
+            formatDA(Math.max(0, r.total_amount - r.amount_paid)),
           ]),
         },
         retours: {
@@ -174,7 +174,7 @@ export function ReportsPage() {
             r.reference,
             r.customer_name,
             formatDateFR(r.returned_at),
-            formatDZD(r.additional_charges),
+            formatDA(r.additional_charges),
             r.remarks || '—',
           ]),
         },
@@ -185,10 +185,10 @@ export function ReportsPage() {
             s.reference,
             formatDateFR(s.sale_date),
             s.customer_name,
-            formatDZD(s.total_amount),
-            formatDZD(s.total_cost),
-            formatDZD(s.amount_paid),
-            formatDZD(Math.max(0, s.total_amount - s.amount_paid)),
+            formatDA(s.total_amount),
+            formatDA(s.total_cost),
+            formatDA(s.amount_paid),
+            formatDA(Math.max(0, s.total_amount - s.amount_paid)),
           ]),
         },
         services: {
@@ -200,9 +200,9 @@ export function ReportsPage() {
             s.customer_name,
             s.service_type_name,
             s.status,
-            formatDZD(s.agreed_price),
-            formatDZD(s.amount_paid),
-            formatDZD(Math.max(0, s.agreed_price - s.amount_paid)),
+            formatDA(s.agreed_price),
+            formatDA(s.amount_paid),
+            formatDA(Math.max(0, s.agreed_price - s.amount_paid)),
           ]),
         },
         paiements: {
@@ -214,7 +214,7 @@ export function ReportsPage() {
             p.customer_name,
             `${p.operation_type} ${p.operation_reference}`,
             p.payment_method,
-            formatDZD(p.amount),
+            formatDA(p.amount),
           ]),
         },
         creances: {
@@ -231,7 +231,7 @@ export function ReportsPage() {
             e.category_name,
             e.description,
             e.payment_method,
-            formatDZD(e.amount),
+            formatDA(e.amount),
           ]),
         },
         stock: {
@@ -259,7 +259,7 @@ export function ReportsPage() {
             m.maintenance_type,
             m.technician_or_supplier || '—',
             m.status,
-            formatDZD(m.cost),
+            formatDA(m.cost),
           ]),
         },
       },

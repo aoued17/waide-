@@ -1,23 +1,57 @@
 import type { DatePreset, Rental } from '../types/erp';
 
-export function formatDZD(amount: number | string | null | undefined): string {
-  const num = Number(amount ?? 0);
-  const safe = Number.isFinite(num) ? num : 0;
-  return (
-    new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(safe) + ' DA'
-  );
+function parseNumericAmount(val: number | string | null | undefined): number {
+  if (typeof val === 'number') {
+    return Number.isFinite(val) ? val : 0;
+  }
+  if (val === null || val === undefined || val === '') return 0;
+  const cleaned = String(val)
+    .replace(/DA|DZD/gi, '')
+    .replace(/[\s\u00A0\u202F\u2007\u2009/]+/g, '')
+    .replace(',', '.');
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function formatFrenchNumberWithAsciiSpace(
+  value: number,
+  minDecimals: number,
+  maxDecimals: number
+): string {
+  const safe = Number.isFinite(value) ? value : 0;
+  const fixed = safe.toFixed(maxDecimals);
+  const [intPart, rawDecPart = ''] = fixed.split('.');
+  const isNeg = intPart.startsWith('-');
+  const absDigits = isNeg ? intPart.slice(1) : intPart;
+  const grouped = absDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const prefix = isNeg && Number(fixed) !== 0 ? '-' : '';
+
+  if (maxDecimals === 0) {
+    return `${prefix}${grouped}`;
+  }
+
+  let decPart = rawDecPart;
+  if (minDecimals < maxDecimals) {
+    decPart = decPart.replace(/0+$/, '');
+    if (decPart.length < minDecimals) {
+      decPart = rawDecPart.slice(0, minDecimals);
+    }
+  }
+
+  return decPart.length > 0 ? `${prefix}${grouped},${decPart}` : `${prefix}${grouped}`;
+}
+
+export function formatDA(val: number | string | null | undefined): string {
+  const safe = parseNumericAmount(val);
+  return `${formatFrenchNumberWithAsciiSpace(safe, 2, 2)} DA`;
+}
+
+export const formatDZD = formatDA;
+
 export function formatQty(val: number | string | null | undefined): string {
-  const num = Number(val ?? 0);
-  const safe = Number.isFinite(num) ? num : 0;
-  return new Intl.NumberFormat('fr-FR', {
-    minimumFractionDigits: safe % 1 === 0 ? 0 : 2,
-    maximumFractionDigits: 2,
-  }).format(safe);
+  const safe = parseNumericAmount(val);
+  const minDecimals = safe % 1 === 0 ? 0 : 2;
+  return formatFrenchNumberWithAsciiSpace(safe, minDecimals, 2);
 }
 
 export function formatDateFR(dateStr: string | Date | null | undefined): string {

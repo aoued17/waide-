@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'batigest-v1';
+const CACHE_VERSION = 'batigest-v3';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -37,6 +37,17 @@ self.addEventListener('message', (event) => {
   }
 });
 
+function isDevOrSourceRequest(url) {
+  if (url.origin !== self.location.origin) return false;
+  return (
+    url.pathname.startsWith('/src/') ||
+    url.pathname.startsWith('/@') ||
+    url.pathname.startsWith('/node_modules/') ||
+    url.searchParams.has('t') ||
+    url.searchParams.has('v')
+  );
+}
+
 function isHtmlOrApiRequest(request, url) {
   if (request.mode === 'navigate') return true;
   const accept = request.headers.get('accept') || '';
@@ -49,12 +60,14 @@ function isHtmlOrApiRequest(request, url) {
 }
 
 function isStaticAsset(request, url) {
+  if (isDevOrSourceRequest(url)) return false;
   if (url.origin !== self.location.origin) {
     return url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com');
   }
   return (
-    ['style', 'script', 'image', 'font'].includes(request.destination) ||
-    /\.(?:js|css|png|jpg|jpeg|svg|webp|woff2?|ico|json)$/i.test(url.pathname)
+    url.pathname.startsWith('/assets/') ||
+    ['image', 'font'].includes(request.destination) ||
+    /\.(?:png|jpg|jpeg|svg|webp|woff2?|ico|json)$/i.test(url.pathname)
   );
 }
 
@@ -64,6 +77,11 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (!url.protocol.startsWith('http')) return;
+
+  // Never serve stale dev/HMR modules from cache
+  if (isDevOrSourceRequest(url)) {
+    return;
+  }
 
   // Network-first for HTML navigations and API/Supabase calls
   if (isHtmlOrApiRequest(request, url)) {
@@ -89,7 +107,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static assets
+  // Cache-first for hashed production assets & static media
   if (isStaticAsset(request, url)) {
     event.respondWith(
       caches.match(request).then((cached) => {
